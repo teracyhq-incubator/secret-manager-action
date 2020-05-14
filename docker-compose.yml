@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  secret-manager:
+    image: node:12.16-alpine3.10
+    working_dir: /opt/app
+    command: sh hack/scripts/run-dev.sh
+    environment:
+      NODE_ENV: development
+    env_file:
+      - ./hack/env/.dev-env
+    volumes:
+      - .:/opt/app

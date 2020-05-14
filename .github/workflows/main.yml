@@ -1,0 +1,27 @@
+on: [push]
+
+jobs:
+  secret-manager:
+    runs-on: ubuntu-latest
+    steps:
+      # To use this repository's private action, we must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get secrets
+        uses: ./
+        id: secret-manager
+        with:
+          config_file_path: ${{ secrets.CONFIG_FILE_PATH }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          type: develop
+          unmasked_keys: 'FOO, PROJECT_ID'
+          exported_keys: 'PROJECT_ID, ENV'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }} # if gist:// protocol is used
+
+      # echo the output key values
+      - name: Echo output key values
+        run: |
+          echo "FOO: ${{ steps.secret-manager.outputs.FOO }}"
+          echo "ENV: ${{ env.ENV }}"

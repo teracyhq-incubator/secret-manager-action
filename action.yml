@@ -1,0 +1,35 @@
+name: 'secret manager action'
+description: 'a github action for secret management with encrypted secrets'
+branding:
+  icon: 'unlock'
+  color: 'blue'
+inputs:
+  config_file_path:
+    description: |-
+      The http path of the configuration file
+    required: true
+    default: null
+  passphrase:
+    description: |-
+      The passphrase to decrypt the encrypted files
+    required: true
+  type:
+    description: |-
+      The type to fetch the right encrypted files
+    required: true
+  unmasked_keys:
+    description: |-
+      All the values are masked by default. You need to specify the keys to be unmasked,
+      keys are separated by common (,) character
+    required: false
+  exported_keys:
+    description: |-
+      You need to speicify the keys to be exported as env vars,
+      keys are separated by comma (,) character
+    required: false
+# all the secret values with be outputs as: outputs.KEY
+# outputs:
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile' # TODO(hoatle): should use the built docker image instead
