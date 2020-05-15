@@ -48,7 +48,7 @@ $ cat .passphrase | gpg --quiet --batch --yes --decrypt --passphrase-fd=0 <file>
   ```
   FOO=bar
   ```
-  + .location_config file format `:type=:.env file location`, for example:
+  + .env-type-config file format `:type=:.env file location`, for example:
 
   ```
   develop=gist://e7e06874c5a7b84d220ff5faf0a2c3a5#.env-common.asc
@@ -58,6 +58,8 @@ $ cat .passphrase | gpg --quiet --batch --yes --decrypt --passphrase-fd=0 <file>
   staging=gist://e7e06874c5a7b84d220ff5faf0a2c3a5#.env-staging-0.asc
   staging=gist://e7e06874c5a7b84d220ff5faf0a2c3a5#.env-staging-1.asc
   ```
+
+  You can see the `hack/fixture/.env-type-config` file and this gist https://gist.github.com/hoatle/e7e06874c5a7b84d220ff5faf0a2c3a5 for more details.
 
   It's recommended that you should use github gist to store those encrypted files.
 
@@ -114,6 +116,15 @@ All the secret values with be outputs as: `outputs.KEY`.
   env:
     GITHUB_TOKEN: ${{ secrets.GH_PAT }} # if gist:// protocol is used
 ```
+
+For example, to use this https://gist.github.com/hoatle/e7e06874c5a7b84d220ff5faf0a2c3a5#file-env-type-config,
+you need to set github secrets with:
+
+```
+CONFIG_FILE_PATH=gist://e7e06874c5a7b84d220ff5faf0a2c3a5#.env-type-config
+PASSPHRASE=ixsTMwBVW+QZGsdf
+```
+
 
 ## How to develop
 
