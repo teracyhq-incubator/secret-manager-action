@@ -1,15 +1,17 @@
 # secret-manager-action
 
-a github action for secret management with encrypted secrets
+a github action for secret management with encryption
 
 ## Why?
 
 Because:
 
-- it's super hard to use github secrets, especially when we have a lots of env vars to be added/updated
-- all the github secrets are masked, but I want to unmask some values, this is impossible with github secrets
-- We have to specify all the secrets on the github actions files, this is not dynamic and flexible
-- We want to use some secrets for different branches, different jobs, this is impossible with github secrets
+- it's super hard to use github secrets, especially when we have lots of env vars to be added/updated
+- all the github secrets are masked, however, we sometimes want to unmask some values, it is
+  impossible with the current github secrets
+- We have to specify all the secrets to be used on the github actions files, this is not dynamic and flexible
+- We want to use some secrets for different branches, different jobs, different types; this is impossible
+  with github secrets
 - We want to automate it all
 
 That's the reason why we build this.
@@ -19,7 +21,8 @@ That's the reason why we build this.
 - Intial setup:
   + a random passphrase to be used for encryption/decryption with OpenPGP (`gpg`)
   + all .env files must be encypted and accessible
-  + an encrypted accessible location config file to specify the type of .env files to be proccessed for each config
+  + an encrypted accessible location config file to specify the type of .env files to be proccessed
+    for each type
 
 - How to encrypt files:
 
@@ -45,7 +48,7 @@ $ cat .passphrase | gpg --quiet --batch --yes --decrypt --passphrase-fd=0 <file>
   ```
   FOO=bar
   ```
-  + .location_config file format `type=.env file location`, for example:
+  + .location_config file format `:type=:.env file location`, for example:
 
   ```
   develop=gist://e7e06874c5a7b84d220ff5faf0a2c3a5#.env-common.asc
@@ -58,19 +61,6 @@ $ cat .passphrase | gpg --quiet --batch --yes --decrypt --passphrase-fd=0 <file>
 
   It's recommended that you should use github gist to store those encrypted files.
 
-
-- Configure this github action:
-
-```yaml
-- uses: teracyhq-incubator/secret-manager-action
-  id: secret-manager
-  with:
-    config_file_path: ${{ secrets.CONFIG_FILE_PATH }}
-    passphrase: ${{ secrets.PASSPHRASE }}
-    type: ${{ env.branch }}
-    unmasked_keys: 'FOO, HELLO'
-    exported_keys: 'FOO'
-```
 
 ### Supported location protocols
 
@@ -132,14 +122,14 @@ $ docker-compose up -d && docker-compose logs -f
 ```
 
 ```bash
-$ docker-compose run --rm secret-manager npm run format
-$ docker-compose run --rm secret-manager npm run lint
-$ docker-compose run --rm secret-manager npm run build
+$ docker-compose exec secret-manager sh
+/opt/app # npm outdated
 ```
 
 ```bash
-$ docker-compose exec secret-manager sh
-/opt/app # npm outdated
+$ docker-compose run --rm secret-manager npm run format
+$ docker-compose run --rm secret-manager npm run lint
+$ docker-compose run --rm secret-manager npm run build
 ```
 
 ## LICENSE
