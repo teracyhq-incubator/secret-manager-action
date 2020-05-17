@@ -107,18 +107,21 @@ All the secret values with be outputs as: `outputs.KEY`.
 ```yaml
     - name: Configure for the secret-manager
       run: |
-        export GIT_BRANCH=$(echo ${GITHUB_REF} | sed -e "s/refs\/heads\///g" | sed -e "s/refs\/tags\///g" \
+        GIT_BRANCH=$(echo ${GITHUB_REF} | sed -e "s/refs\/heads\///g" | sed -e "s/refs\/tags\///g" \
         | sed -e "s/refs\/pull\///g" | sed -e "s/=/-/g")
-        echo "::set-env name=GIT_BRANCH::$GIT_BRANCH"
-        export SM_UNMASKED_KEYS='FOO, HELLO'
-        echo "::set-env name=SM_UNMASKED_KEYS::$SM_UNMASKED_KEYS"
-        export SM_EXPORTED_KEYS='FOO'
-        echo "::set-env name=SM_EXPORTED_KEYS::$SM_EXPORTED_KEYS"
+
+        SM_UNMASKED_KEYS='FOO, PROJECT_ID'
+
+        SM_EXPORTED_KEYS='ENV'
 
         # enable secret-manager only when CONFIG_FILE_PATH and PASSPHRASE are configured
         if [ "${CONFIG_FILE_PATH}" != '' ] && [ "${PASSPHRASE}" != '' ]; then
           echo "::set-env name=SM_ALLOWED::true"
         fi
+
+        echo "::set-env name=GIT_BRANCH::$GIT_BRANCH"
+        echo "::set-env name=SM_UNMASKED_KEYS::$SM_UNMASKED_KEYS"
+        echo "::set-env name=SM_EXPORTED_KEYS::$SM_EXPORTED_KEYS"
       env:
         CONFIG_FILE_PATH: ${{ secrets.CONFIG_FILE_PATH }}
         PASSPHRASE: ${{ secrets.PASSPHRASE }}
