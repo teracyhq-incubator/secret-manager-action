@@ -35,9 +35,7 @@ async function run(): Promise<void> {
         inputs.passphrase === "" ||
         inputs.type === ""
       ) {
-        console.log(
-          "the run step is skipped due to one of the required inputs is not configured"
-        );
+        console.log("skipped due to one of the required inputs are not configured");
         return;
       }
     } else {
