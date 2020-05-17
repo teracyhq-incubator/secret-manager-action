@@ -4,24 +4,42 @@ jobs:
   secret-manager:
     runs-on: ubuntu-latest
     steps:
-      # To use this repository's private action, we must check out the repository
-      - name: Checkout
-        uses: actions/checkout@v2
+    # To use this repository's private action, we must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
 
-      - name: Get secrets
-        uses: ./
-        id: secret-manager
-        with:
-          config_file_path: ${{ secrets.CONFIG_FILE_PATH }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          type: develop
-          unmasked_keys: 'FOO, PROJECT_ID'
-          exported_keys: 'PROJECT_ID, ENV'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }} # if gist:// protocol is used
+    - name: Configure for the secret-manager
+      run: |
+        export GIT_BRANCH=$(echo ${GITHUB_REF} | sed -e "s/refs\/heads\///g" | sed -e "s/refs\/tags\///g" \
+        | sed -e "s/refs\/pull\///g" | sed -e "s/=/-/g")
+        echo "::set-env name=GIT_BRANCH::$GIT_BRANCH"
+        export SM_UNMASKED_KEYS='FOO, HELLO'
+        echo "::set-env name=SM_UNMASKED_KEYS::$SM_UNMASKED_KEYS"
+        export SM_EXPORTED_KEYS='FOO'
+        echo "::set-env name=SM_EXPORTED_KEYS::$SM_EXPORTED_KEYS"
 
-      # echo the output key values
-      - name: Echo output key values
-        run: |
-          echo "FOO: ${{ steps.secret-manager.outputs.FOO }}"
-          echo "ENV: ${{ env.ENV }}"
+        # enable secret-manager only when CONFIG_FILE_PATH and PASSPHRASE are configured
+        if [ "${CONFIG_FILE_PATH}" != '' ] && [ "${PASSPHRASE}" != '' ]; then
+          echo "::set-env name=SM_ALLOWED::true"
+        fi
+      env:
+        CONFIG_FILE_PATH: ${{ secrets.CONFIG_FILE_PATH }}
+        PASSPHRASE: ${{ secrets.PASSPHRASE }}
+
+    - uses: ./
+      if: env.SM_ALLOWED == 'true'
+      id: secret-manager
+      with:
+        config_file_path: ${{ secrets.CONFIG_FILE_PATH }}
+        passphrase: ${{ secrets.PASSPHRASE }}
+        type: ${{ env.GIT_BRANCH }}
+        unmasked_keys: ${{ env.SM_UNMASKED_KEYS }}
+        exported_keys: ${{ env.SM_EXPORTED_KEYS }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_PAT }} # if gist:// protocol is used
+
+    # echo the output key values
+    - name: Echo output key values
+      run: |
+        echo "FOO: ${{ steps.secret-manager.outputs.FOO }}"
+        echo "ENV: ${{ env.ENV }}"
