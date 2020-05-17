@@ -77,21 +77,15 @@ $ cat .passphrase | gpg --quiet --batch --yes --decrypt --passphrase-fd=0 <file>
 
 ### `config_file_path`
 
-**Optional when skip_allowed=true** The http path of the configuration file.
-
-**Required when skip_allowed=false** The http path of the configuration file.
+**Required** The http path of the configuration file.
 
 ### `passphrase`
 
-**Optional when skip_allowed=true** The passphrase to decrypt the encrypted files.
-
-**Required when skip_allowed=false** The passphrase to decrypt the encrypted files.
+**Required** The passphrase to decrypt the encrypted files.
 
 ### `type`
 
-**Optional when skip_allowed=true** The type to fetch the right encrypted files.
-
-**Required when skip_allowed=false** The type to fetch the right encrypted files.
+**Required** The type to fetch the right encrypted files.
 
 ### `unmasked_keys`
 
@@ -103,13 +97,6 @@ $ cat .passphrase | gpg --quiet --batch --yes --decrypt --passphrase-fd=0 <file>
 **Optional**  Specify the keys to be exported as env vars, keys are separated by comma (,) character.
 
 
-### `skip_allowed`
-
-**Optional** if true:  when all the required inputs are not configured, skip the run step.
-             if false: when required input are not configured, the run step get failed.
-**Default** true
-
-
 ## Outputs
 
 All the secret values with be outputs as: `outputs.KEY`.
@@ -118,26 +105,16 @@ All the secret values with be outputs as: `outputs.KEY`.
 ## Example usage
 
 ```yaml
-      - name: Configure for secret-manager
-        run: |
-          export GIT_BRANCH=$(echo ${GITHUB_REF} | sed -e "s/refs\/heads\///g" | sed -e "s/refs\/tags\///g" \
-          | sed -e "s/refs\/pull\///g" | sed -e "s/=/-/g")
-          echo "::set-env name=GIT_BRANCH::$GIT_BRANCH"
-          export SM_UNMASKED_KEYS='FOO, HELLO'
-          echo "::set-env name=SM_UNMASKED_KEYS::$SM_UNMASKED_KEYS"
-          export SM_EXPORTED_KEYS='FOO'
-          echo "::set-env name=SM_EXPORTED_KEYS::$SM_EXPORTED_KEYS"
-
-      - uses: ./
-        id: secret-manager
-        with:
-          config_file_path: ${{ secrets.CONFIG_FILE_PATH }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          type: ${{ env.GIT_BRANCH }}
-          unmasked_keys: ${{ env.SM_UNMASKED_KEYS }}
-          exported_keys: ${{ env.SM_EXPORTED_KEYS }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }} # if gist:// protocol is used
+- uses: teracyhq-incubator/secret-manager-action@v1
+  id: secret-manager
+  with:
+    config_file_path: ${{ secrets.CONFIG_FILE_PATH }}
+    passphrase: ${{ secrets.PASSPHRASE }}
+    type: ${{ env.branch }}
+    unmasked_keys: 'FOO, HELLO'
+    exported_keys: 'FOO'
+  env:
+    GITHUB_TOKEN: ${{ secrets.GH_PAT }} # if gist:// protocol is used
 ```
 
 For example, to use this https://gist.github.com/hoatle/e7e06874c5a7b84d220ff5faf0a2c3a5#file-env-type-config,
@@ -152,25 +129,19 @@ PASSPHRASE=ixsTMwBVW+QZGsdf
 ## How to develop
 
 ```bash
-# execute this command again if the hack/env/.dev-env file is updated
 $ docker-compose up -d && docker-compose logs -f
 ```
 
 ```bash
-# ssh into the running container
 $ docker-compose exec secret-manager sh
 /opt/app # npm outdated
 ```
 
 ```bash
-# some commands can be used to run
 $ docker-compose run --rm secret-manager npm run format
 $ docker-compose run --rm secret-manager npm run lint
 $ docker-compose run --rm secret-manager npm run build
-$ docker-compose run --rm secret-manager npm install boolean --save # for example to install a npm package
 ```
-
-- github action debugging: https://github.com/actions/toolkit/blob/master/docs/action-debugging.md
 
 ## LICENSE
 

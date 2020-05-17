@@ -1,8 +1,6 @@
 #!/bin/sh
 
-if ! [ -x "$(command -v ggp)" ]; then
-  apk add gnupg
-fi
+apk add gnupg
 
 npm install
 npm run dev

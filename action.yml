@@ -7,15 +7,16 @@ inputs:
   config_file_path:
     description: |-
       The http path of the configuration file
-    required: false # true when skip_allowed=false
+    required: true
+    default: null
   passphrase:
     description: |-
       The passphrase to decrypt the encrypted files
-    required: false # true when skip_allowed=false
+    required: true
   type:
     description: |-
       The type to fetch the right encrypted files
-    required: false # true when skip_allowed=false
+    required: true
   unmasked_keys:
     description: |-
       All the values are masked by default. You need to specify the keys to be unmasked,
@@ -23,14 +24,9 @@ inputs:
     required: false
   exported_keys:
     description: |-
-      Specify the keys to be exported as env vars,
+      You need to speicify the keys to be exported as env vars,
       keys are separated by comma (,) character
     required: false
-  skip_allowed:
-    description: -|
-      Allow to skip this run step if required inputs are not configured
-    required: false
-    default: true
 # all the secret values with be outputs as: outputs.KEY
 # outputs:
 
