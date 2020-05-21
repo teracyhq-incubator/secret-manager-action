@@ -162,7 +162,6 @@ async function parseEnvPaths(
     }
   });
 
-  core.debug(`env: ${JSON.stringify(env)}`);
   return env;
 }
 
