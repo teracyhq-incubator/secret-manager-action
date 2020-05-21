@@ -5,7 +5,6 @@ import * as util from "./util";
 
 async function run(): Promise<void> {
   try {
-    // setGracefulCleanup();
     const configFilePath = core.getInput("config_file_path", {
       required: true,
     });
@@ -16,15 +15,21 @@ async function run(): Promise<void> {
     const unmaskedKeys = core.getInput("unmasked_keys") || "";
     const exportedKeys = core.getInput("exported_keys") || "";
 
+    core.debug(`configFilePath: ${configFilePath}`);
+    core.debug(`type: ${type}`);
+    core.debug(`unmaskedKeys: ${unmaskedKeys}`);
+    core.debug(`exportedKeys: ${exportedKeys}`);
+
     const env = await config.getConfigEnv({
       configFilePath,
       type,
       passphrase,
     });
-    util.outputEnv(env);
     util.unmaskValuesByKeys(env, unmaskedKeys.split(","));
+    util.outputEnv(env);
     util.exportValuesByKeys(env, exportedKeys.split(","));
   } catch (err) {
+    core.debug(err);
     core.setFailed(err.message);
   }
 }
