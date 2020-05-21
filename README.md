@@ -87,14 +87,14 @@ $ cat .passphrase | gpg --quiet --batch --yes --decrypt --passphrase-fd=0 <file>
 
 **Required** The type to fetch the right encrypted files.
 
-### `unmasked_keys`
+### `masked_keys`
 
-**Optional** All the values are masked by default. You need to specify the keys to be unmasked,
-             keys are separated by common (,) character.
+**Optional** All the values are unmasked by default. You need to specify the keys to be masked,
+             keys are separated by a common (,) character.
 
 ### `exported_keys`
 
-**Optional**  Specify the keys to be exported as env vars, keys are separated by comma (,) character.
+**Optional**  Specify the keys to be exported as env vars, keys are separated by a comma (,) character.
               Set to "\*" to export all key-values as env vars.
 
 ## Outputs
@@ -110,7 +110,7 @@ All the secret values with be outputs as: `outputs.KEY`.
         GIT_BRANCH=$(echo ${GITHUB_REF} | sed -e "s/refs\/heads\///g" | sed -e "s/refs\/tags\///g" \
         | sed -e "s/refs\/pull\///g" | sed -e "s/=/-/g")
 
-        SM_UNMASKED_KEYS='FOO, PROJECT_ID'
+        SM_MASKED_KEYS='FOO'
 
         SM_EXPORTED_KEYS='ENV'
 
@@ -120,7 +120,7 @@ All the secret values with be outputs as: `outputs.KEY`.
         fi
 
         echo "::set-env name=GIT_BRANCH::$GIT_BRANCH"
-        echo "::set-env name=SM_UNMASKED_KEYS::$SM_UNMASKED_KEYS"
+        echo "::set-env name=SM_MASKED_KEYS::$SM_MASKED_KEYS"
         echo "::set-env name=SM_EXPORTED_KEYS::$SM_EXPORTED_KEYS"
       env:
         CONFIG_FILE_PATH: ${{ secrets.CONFIG_FILE_PATH }}
@@ -133,7 +133,7 @@ All the secret values with be outputs as: `outputs.KEY`.
         config_file_path: ${{ secrets.CONFIG_FILE_PATH }}
         passphrase: ${{ secrets.PASSPHRASE }}
         type: ${{ env.GIT_BRANCH }}
-        unmasked_keys: ${{ env.SM_UNMASKED_KEYS }}
+        masked_keys: ${{ env.SM_MASKED_KEYS }}
         exported_keys: ${{ env.SM_EXPORTED_KEYS }}
       env:
         GITHUB_TOKEN: ${{ secrets.GH_PAT }} # if gist:// protocol is used

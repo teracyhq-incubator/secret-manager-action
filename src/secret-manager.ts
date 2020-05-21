@@ -12,12 +12,12 @@ async function run(): Promise<void> {
       required: true,
     });
     const type = core.getInput("type", { required: true });
-    const unmaskedKeys = core.getInput("unmasked_keys") || "";
+    const maskedKeys = core.getInput("masked_keys") || "";
     const exportedKeys = core.getInput("exported_keys") || "";
 
     core.debug(`configFilePath: ${configFilePath}`);
     core.debug(`type: ${type}`);
-    core.debug(`unmaskedKeys: ${unmaskedKeys}`);
+    core.debug(`maskedKeys: ${maskedKeys}`);
     core.debug(`exportedKeys: ${exportedKeys}`);
 
     const env = await config.getConfigEnv({
@@ -25,7 +25,7 @@ async function run(): Promise<void> {
       type,
       passphrase,
     });
-    util.unmaskValuesByKeys(env, unmaskedKeys.split(","));
+    util.maskValuesByKeys(env, maskedKeys.split(","));
     util.outputEnv(env);
     util.exportValuesByKeys(env, exportedKeys.split(","));
   } catch (err) {
