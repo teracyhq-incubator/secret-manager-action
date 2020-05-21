@@ -95,7 +95,7 @@ $ cat .passphrase | gpg --quiet --batch --yes --decrypt --passphrase-fd=0 <file>
 ### `exported_keys`
 
 **Optional**  Specify the keys to be exported as env vars, keys are separated by comma (,) character.
-
+              Set to "\*" to export all key-values as env vars.
 
 ## Outputs
 
