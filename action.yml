@@ -17,15 +17,16 @@ inputs:
     description: |-
       The type to fetch the right encrypted files
     required: true
-  unmasked_keys:
+  masked_keys:
     description: |-
-      All the values are masked by default. You need to specify the keys to be unmasked,
-      keys are separated by common (,) character
+      All the values are unmasked by default. You need to specify the keys to be masked,
+      keys are separated by a common (,) character
     required: false
   exported_keys:
     description: |-
       You need to speicify the keys to be exported as env vars,
-      keys are separated by comma (,) character
+      keys are separated by a comma (,) character.
+      Set to "*" to export all key-values as env vars.
     required: false
 # all the secret values with be outputs as: outputs.KEY
 # outputs:
