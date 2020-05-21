@@ -68,9 +68,9 @@ $ cat .passphrase | gpg --quiet --batch --yes --decrypt --passphrase-fd=0 <file>
 
 - `gist://:gist_id#:file_name` or `gist://:gist_id/:sha#:file_name`
 
-- `file://:relative_location_to_github_action_workspace`
+- `file://:relative_location_to_github_action_workspace` (Not yet implemented)
 
-- `http://:domain/:path` or `https://:domain/:path`
+- `http://:domain/:path` or `https://:domain/:path` (Not yet implemented)
 
 
 ## Inputs
