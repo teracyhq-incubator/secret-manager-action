@@ -106,37 +106,47 @@ All the secret values with be outputs as: `outputs.KEY`.
 
 ```yaml
     - name: Configure for the secret-manager
+      id: secret-manager-config
       run: |
+        set -e
         GIT_BRANCH=$(echo ${GITHUB_REF} | sed -e "s/refs\/heads\///g" | sed -e "s/refs\/tags\///g" \
         | sed -e "s/refs\/pull\///g" | sed -e "s/=/-/g")
 
-        SM_MASKED_KEYS='FOO'
-
-        SM_EXPORTED_KEYS='ENV'
-
-        # enable secret-manager only when CONFIG_FILE_PATH and PASSPHRASE are configured
-        if [ "${CONFIG_FILE_PATH}" != '' ] && [ "${PASSPHRASE}" != '' ]; then
-          echo "::set-env name=SM_ALLOWED::true"
+        # allow to override
+        if [ -z "${SM_MASKED_KEYS}" ]; then
+          SM_MASKED_KEYS="FOO"
         fi
 
-        echo "::set-env name=GIT_BRANCH::$GIT_BRANCH"
-        echo "::set-env name=SM_MASKED_KEYS::$SM_MASKED_KEYS"
-        echo "::set-env name=SM_EXPORTED_KEYS::$SM_EXPORTED_KEYS"
+        SM_EXPORTED_KEYS="ENV"
+
+        # false by default
+        echo "::set-output name=sm_enabled::false"
+        # enable secret-manager only when CONFIG_FILE_PATH and PASSPHRASE are configured
+        if [ "${CONFIG_FILE_PATH}" != "" ] && [ "${PASSPHRASE}" != "" ]; then
+          echo "::debug::SM_CONFIG_FILE_PATH and SM_PASSPHRASE are configured"
+          echo "::set-output name=sm_enabled::true"
+        fi
+
+        echo "::set-output name=sm_type::$GIT_BRANCH"
+        echo "::set-output name=sm_masked_keys::$SM_MASKED_KEYS"
+        echo "::set-output name=sm_exported_keys::$SM_EXPORTED_KEYS"
+
       env:
-        CONFIG_FILE_PATH: ${{ secrets.CONFIG_FILE_PATH }}
-        PASSPHRASE: ${{ secrets.PASSPHRASE }}
+        CONFIG_FILE_PATH: ${{ secrets.SM_CONFIG_FILE_PATH }}
+        PASSPHRASE: ${{ secrets.SM_PASSPHRASE }}
+        SM_MASKED_KEYS: ${{ secrets.SM_MASKED_KEYS }}
 
     - uses: teracyhq-incubator/secret-manager-action@develop
-      if: env.SM_ALLOWED == 'true'
+      if: steps.secret-manager-config.outputs.sm_enabled == 'true'
       id: secret-manager
       with:
-        config_file_path: ${{ secrets.CONFIG_FILE_PATH }}
-        passphrase: ${{ secrets.PASSPHRASE }}
-        type: ${{ env.GIT_BRANCH }}
-        masked_keys: ${{ env.SM_MASKED_KEYS }}
-        exported_keys: ${{ env.SM_EXPORTED_KEYS }}
+        config_file_path: ${{ secrets.SM_CONFIG_FILE_PATH }}
+        passphrase: ${{ secrets.SM_PASSPHRASE }}
+        type: ${{ steps.secret-manager-config.outputs.sm_type }}
+        masked_keys: ${{ steps.secret-manager-config.outputs.sm_masked_keys }}
+        exported_keys: ${{ steps.secret-manager-config.outputs.sm_exported_keys }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_PAT }} # if gist:// protocol is used
+        GITHUB_TOKEN: ${{ secrets.SM_GH_PAT }} # if gist:// protocol is used
 ```
 
 For example, to use this https://gist.github.com/hoatle/e7e06874c5a7b84d220ff5faf0a2c3a5#file-env-type-config,
