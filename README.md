@@ -7,10 +7,10 @@ a github action for secret management with encryption
 Because:
 
 - it's super hard to use github secrets, especially when we have lots of env vars to be added/updated
-- all the github secrets are masked, however, we sometimes want to unmask some values, it is
+- all the github secrets are masked, however, sometimes we want to unmask some values, it is
   impossible with the current github secrets
 - We have to specify all the secrets to be used on the github actions files, this is not dynamic and flexible
-- We want to use some secrets for different branches, different jobs, different types; this is impossible
+- We want to select secrets for different branches, different jobs, different types; this is impossible
   with github secrets
 - We want to automate it all
 
