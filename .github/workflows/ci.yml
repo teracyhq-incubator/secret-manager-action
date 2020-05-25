@@ -1,0 +1,159 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  # to trigger manually with webhook
+  # curl -X POST https://api.github.com/repos/:owner/:repo/dispatches \
+  # -H 'Accept: application/vnd.github.everest-preview+json' \
+  # -H 'Authorization: token TOKEN_VALUE_HERE' \
+  # --data '{"event_type":"exec-ci","client_payload":{}}'
+  repository_dispatch:
+    types: [exec-ci]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Lint
+      run: |
+        docker-compose run --rm secret-manager npm install
+        docker-compose run --rm secret-manager npm run format
+        docker-compose run --rm secret-manager npm run lint
+
+    - name: Test
+      run: |
+        docker-compose run --rm secret-manager npm run test
+
+  build:
+    needs: [verify]
+    outputs:
+      publish_enabled: ${{ steps.normalize-vars.outputs.publish_enabled }}
+      ci_registry_image: ${{ steps.normalize-vars.outputs.ci_registry_image }}
+      img_tag: ${{ steps.normalize-vars.outputs.img_tag }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure for the secret-manager
+      id: secret-manager-config
+      run: |
+        set -e
+        . ./hack/scripts/secret_manager_config.sh
+        # restore if any to use this github action with Dockerfile
+        sed -i "/image:/c\  image: 'Dockerfile'" action.yml
+      env:
+        CONFIG_FILE_PATH: ${{ secrets.SM_CONFIG_FILE_PATH }}
+        PASSPHRASE: ${{ secrets.SM_PASSPHRASE }}
+        SM_MASKED_KEYS: ${{ secrets.SM_MASKED_KEYS }}
+
+    - uses: ./
+      if: steps.secret-manager-config.outputs.sm_enabled == 'true'
+      id: secret-manager
+      with:
+        config_file_path: ${{ secrets.SM_CONFIG_FILE_PATH }}
+        passphrase: ${{ secrets.SM_PASSPHRASE }}
+        type: ${{ steps.secret-manager-config.outputs.sm_type }}
+        masked_keys: ${{ steps.secret-manager-config.outputs.sm_masked_keys }}
+        exported_keys: ${{ steps.secret-manager-config.outputs.sm_exported_keys }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.SM_GH_PAT }} # if gist:// protocol is used
+
+    - name: Normalize vars
+      id: normalize-vars
+      run: |
+        set -e
+        . ./hack/scripts/ci_normalize_vars.sh
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        IMG_TAG: ${{ steps.secret-manager.outputs.IMG_TAG }}
+        DOCKER_PUSH_ENABLED: ${{ steps.secret-manager.outputs.DOCKER_PUSH_ENABLED }}
+        CI_REGISTRY_IMAGE: ${{ steps.secret-manager.outputs.CI_REGISTRY_IMAGE }}
+        DOCKER_USERNAME: ${{ steps.secret-manager.outputs.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ steps.secret-manager.outputs.DOCKER_PASSWORD }}
+        BUILD_ENABLED: ${{ steps.secret-manager.outputs.BUILD_APP_ENABLED }}
+        GCP_KEY_FILE_BASE64: ${{ steps.secret-manager.outputs.GCP_KEY_FILE_BASE64 }}
+
+    - name: Build
+      run: |
+        docker build -t teracyhq-incubator/secret-manager-action:develop .
+      if: steps.normalize-vars.outputs.build_enabled == 'true'
+
+    - name: Login to docker registry with username and password
+      uses: azure/docker-login@v1
+      if:  steps.normalize-vars.outputs.login_docker_registry_username_password_enabled == 'true'
+      with:
+        login-server: ${{ steps.normalize-vars.outputs.docker_login_server }}
+        username: ${{ steps.normalize-vars.outputs.docker_username }}
+        password: ${{ steps.normalize-vars.outputs.docker_password }}
+
+    - name: Get Google Container Registry credentials
+      id: gcloud
+      uses: elgohr/gcloud-login-action@57bdc0c38b4fa77c90801d77b2057d8288c2d0b7
+      if: steps.normalize-vars.outputs.login_gcloud_enabled == 'true'
+      with:
+        account_key: ${{ secrets.GCP_KEY_FILE_BASE64 }}
+
+    - name: Login to GCR with credentials
+      uses: azure/docker-login@v1
+      if: steps.normalize-vars.outputs.login_gcloud_enabled == 'true'
+      with:
+        login-server: ${{ steps.normalize-vars.outputs.docker_login_server }}
+        username: ${{ steps.gcloud.outputs.username }}
+        password: ${{ steps.gcloud.outputs.password }}
+
+    - name: Docker push
+      run: |
+        cat $DOCKER_CONFIG/config.json
+        docker tag teracyhq-incubator/secret-manager-action:develop $CI_REGISTRY_IMAGE/secret-manager-action:$IMG_TAG
+        echo "::debug::docker push $CI_REGISTRY_IMAGE/secret-manager-action:$IMG_TAG"
+        docker push $CI_REGISTRY_IMAGE/secret-manager-action:$IMG_TAG
+      if: steps.normalize-vars.outputs.publish_enabled == 'true'
+      env:
+        CI_REGISTRY_IMAGE: ${{ steps.normalize-vars.outputs.ci_registry_image }}
+        IMG_TAG: ${{ steps.normalize-vars.outputs.img_tag }}
+
+  update:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Format
+      id: format
+      run: |
+        docker-compose run --rm secret-manager npm install
+        docker-compose run --rm secret-manager npm run format
+
+        BRANCH=$(echo ${GITHUB_REF} | sed -e "s/refs\/heads\///g")
+        echo "::set-output name=branch::$BRANCH"
+
+    # TODO(hoatle): only update this on tag releases
+    # - name: Update action.yml
+    #   run: |
+    #     set -e
+    #     . ./hack/scripts/update_action_yml.sh
+    #     cat action.yml
+    #   if: needs.build.outputs.publish_enabled == 'true'
+    #   env:
+    #     CI_REGISTRY_IMAGE: ${{ needs.build.outputs.ci_registry_image }}
+    #     IMG_TAG: ${{ needs.build.outputs.img_tag }}
+
+    - name: Git commit files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "automated format, action.yml updates from CI" || true # ok if no changes
+      if: steps.format.outputs.branch == 'develop'
+
+    - name: Git push changes
+      uses: ad-m/github-push-action@v0.5.0
+      if: steps.format.outputs.branch == 'develop'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ steps.format.outputs.branch }}
+
+
