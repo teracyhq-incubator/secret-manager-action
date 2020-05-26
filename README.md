@@ -153,8 +153,9 @@ For example, to use this https://gist.github.com/hoatle/e7e06874c5a7b84d220ff5fa
 you need to set github secrets with:
 
 ```
-CONFIG_FILE_PATH=gist://e7e06874c5a7b84d220ff5faf0a2c3a5#.env-type-config
-PASSPHRASE=ixsTMwBVW+QZGsdf
+SM_CONFIG_FILE_PATH=gist://e7e06874c5a7b84d220ff5faf0a2c3a5#.env-type-config
+SM_PASSPHRASE=ixsTMwBVW+QZGsdf
+SM_GH_PAT=5d93dd14f214b7f5489856f1110dc898c203173f
 ```
 
 
