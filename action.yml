@@ -33,4 +33,4 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'teracyincubator/secret-manager-action:v0.1.0'
+  image: 'docker://teracyincubator/secret-manager-action:v0.1.0'
