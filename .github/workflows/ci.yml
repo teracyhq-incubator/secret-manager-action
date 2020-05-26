@@ -106,7 +106,6 @@ jobs:
 
     - name: Docker push
       run: |
-        cat $DOCKER_CONFIG/config.json
         docker tag teracyhq-incubator/secret-manager-action:develop $CI_REGISTRY_IMAGE/secret-manager-action:$IMG_TAG
         echo "::debug::docker push $CI_REGISTRY_IMAGE/secret-manager-action:$IMG_TAG"
         docker push $CI_REGISTRY_IMAGE/secret-manager-action:$IMG_TAG
