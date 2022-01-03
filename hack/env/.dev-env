@@ -1,7 +1,7 @@
 # simulate github actions env vars
 
 GITHUB_ACTION=self
-GITHUB_TOKEN=5d93dd14f214b7f5489856f1110dc898c203173f
+GITHUB_TOKEN=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
 
 INPUT_CONFIG_FILE_PATH=gist://e7e06874c5a7b84d220ff5faf0a2c3a5#.env-type-config
 INPUT_PASSPHRASE=ixsTMwBVW+QZGsdf
