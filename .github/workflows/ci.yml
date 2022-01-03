@@ -91,7 +91,7 @@ jobs:
 
     - name: Get Google Container Registry credentials
       id: gcloud
-      uses: elgohr/gcloud-login-action@57bdc0c38b4fa77c90801d77b2057d8288c2d0b7
+      uses: elgohr/gcloud-login-action@0.3
       if: steps.normalize-vars.outputs.login_gcloud_enabled == 'true'
       with:
         account_key: ${{ secrets.GCP_KEY_FILE_BASE64 }}
