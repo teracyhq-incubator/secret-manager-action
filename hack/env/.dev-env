@@ -1,6 +1,8 @@
 # simulate github actions env vars
 
 GITHUB_ACTION=self
+# you need to create a personal token (without any permission) to fetch gists
+# this token was revoked by github when the commit is scanned for security
 GITHUB_TOKEN=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
 
 INPUT_CONFIG_FILE_PATH=gist://e7e06874c5a7b84d220ff5faf0a2c3a5#.env-type-config
