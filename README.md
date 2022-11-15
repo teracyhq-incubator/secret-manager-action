@@ -120,16 +120,16 @@ All the secret values with be outputs as: `outputs.KEY`.
         SM_EXPORTED_KEYS="ENV"
 
         # false by default
-        echo "::set-output name=sm_enabled::false"
+        echo "sm_enabled=false" >> $GITHUB_OUTPUT
         # enable secret-manager only when CONFIG_FILE_PATH and PASSPHRASE are configured
         if [ "${CONFIG_FILE_PATH}" != "" ] && [ "${PASSPHRASE}" != "" ]; then
           echo "::debug::SM_CONFIG_FILE_PATH and SM_PASSPHRASE are configured"
-          echo "::set-output name=sm_enabled::true"
+          echo "sm_enabled=true" >> $GITHUB_OUTPUT
         fi
 
-        echo "::set-output name=sm_type::$GIT_BRANCH"
-        echo "::set-output name=sm_masked_keys::$SM_MASKED_KEYS"
-        echo "::set-output name=sm_exported_keys::$SM_EXPORTED_KEYS"
+        echo "sm_type=$GIT_BRANCH" >> $GITHUB_OUTPUT
+        echo "sm_masked_keys=$SM_MASKED_KEYS" >> $GITHUB_OUTPUT
+        echo "sm_exported_keys=$SM_EXPORTED_KEYS" >> $GITHUB_OUTPUT
 
       env:
         CONFIG_FILE_PATH: ${{ secrets.SM_CONFIG_FILE_PATH }}

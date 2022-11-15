@@ -15,7 +15,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Lint
       run: |
@@ -35,7 +35,7 @@ jobs:
       img_tag: ${{ steps.normalize-vars.outputs.img_tag }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure for the secret-manager
       id: secret-manager-config
@@ -118,7 +118,7 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Format
       id: format
@@ -127,7 +127,7 @@ jobs:
         docker-compose run --rm secret-manager npm run format
 
         BRANCH=$(echo ${GITHUB_REF} | sed -e "s/refs\/heads\///g")
-        echo "::set-output name=branch::$BRANCH"
+        echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
     # TODO(hoatle): only update this on tag releases
     # - name: Update action.yml
