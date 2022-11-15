@@ -2,7 +2,7 @@ version: "3"
 
 services:
   secret-manager:
-    image: node:12.16-alpine3.10
+    image: node:16-alpine3.15
     working_dir: /opt/app
     command: sh hack/scripts/run-dev.sh
     environment:
