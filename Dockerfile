@@ -1,5 +1,5 @@
 # use the latest LTS node version + security fix only alpine version
-ARG NODE_VERSION=node:16-alpine3.15 # 12.16-alpine3.10
+ARG NODE_VERSION=16-alpine3.15 # 12.16-alpine3.10
 
 FROM node:${NODE_VERSION} AS builder
 
