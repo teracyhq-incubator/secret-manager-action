@@ -136,7 +136,7 @@ All the secret values with be outputs as: `outputs.KEY`.
         PASSPHRASE: ${{ secrets.SM_PASSPHRASE }}
         SM_MASKED_KEYS: ${{ secrets.SM_MASKED_KEYS }}
 
-    - uses: teracyhq-incubator/secret-manager-action@v0.2.0
+    - uses: teracyhq-incubator/secret-manager-action@v0.3.0
       if: steps.secret-manager-config.outputs.sm_enabled == 'true'
       id: secret-manager
       with:

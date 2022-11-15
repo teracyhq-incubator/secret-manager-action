@@ -6,6 +6,9 @@ Follow: http://dev.teracy.org/docs/release_process.html
 
 Update to use the built released docker image
 
+## Update package.json
+
+Update the version
 
 ## Update CHANGELOG.md
 
