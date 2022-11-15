@@ -64,47 +64,47 @@ fi
 
 if contains "$CI_REGISTRY_IMAGE" "gcr.io" ; then
   export PUSH_TO_GCR=true;
-  echo "::set-output name=push_to_gcr::true"
+  echo "push_to_gcr=true" >> $GITHUB_OUTPUT
 fi
 
 
 if contains "$CI_REGISTRY_IMAGE" "." ; then
-  echo "::set-output name=docker_login_server::$CI_REGISTRY_IMAGE"
+  echo "docker_login_server=$CI_REGISTRY_IMAGE" >> $GITHUB_OUTPUT
 else
-  echo "::set-output name=docker_login_server::https://index.docker.io/v1/"
+  echo "docker_login_server=https://index.docker.io/v1/" >> $GITHUB_OUTPUT
 fi
 
 
-echo "::set-output name=img_tag::$IMG_TAG"
-echo "::set-output name=ci_registry_image::$CI_REGISTRY_IMAGE"
-echo "::set-output name=docker_username::$DOCKER_USERNAME"
-echo "::set-output name=docker_password::$DOCKER_PASSWORD"
-echo "::set-output name=docker_push_enabled::$DOCKER_PUSH_ENABLED"
+echo "img_tag=$IMG_TAG" >> $GITHUB_OUTPUT
+echo "ci_registry_image=$CI_REGISTRY_IMAGE" >> $GITHUB_OUTPUT
+echo "docker_username=$DOCKER_USERNAME" >> $GITHUB_OUTPUT
+echo "docker_password=$DOCKER_PASSWORD" >> $GITHUB_OUTPUT
+echo "docker_push_enabled=$DOCKER_PUSH_ENABLED" >> $GITHUB_OUTPUT
 
 
 if [ "${BUILD_ENABLED}" == "false" ]; then
-  echo "::set-output name=build_enabled::false"
+  echo "build_enabled=false" >> $GITHUB_OUTPUT
 else
   export BUILD_ENABLED=true;
-  echo "::set-output name=build_enabled::true"
+  echo "build_enabled=true" >> $GITHUB_OUTPUT
 fi
 
 # login docker registry with username and password
-echo "::set-output name=login_docker_registry_username_password_enabled::false"
+echo "login_docker_registry_username_password_enabled=false" >> $GITHUB_OUTPUT
 if [ "$BUILD_ENABLED" == "true" ] && [ "$DOCKER_PUSH_ENABLED" == "true" ] && \
    [ "$DOCKER_USERNAME" != "" ] && [ "$DOCKER_PASSWORD" != "" ] && [ "$PUSH_TO_GCR" != "true" ] ; then
-   echo "::set-output name=login_docker_registry_username_password_enabled::true"
+   echo "login_docker_registry_username_password_enabled=true" >> $GITHUB_OUTPUT
 fi
 
 # login gcloud
-echo "::set-output name=login_gcloud::false"
+echo "login_gcloud=false" >> $GITHUB_OUTPUT
 if [ "$BUILD_ENABLED" == "true" ] && [ "$DOCKER_PUSH_ENABLED" == "true" ] && \
    [ "$PUSH_TO_GCR" == "true" ] && [ "$GCP_KEY_FILE_BASE64" != "" ]; then
-   echo "::set-output name=login_gcloud_enabled::true"
+   echo "login_gcloud_enabled=true" >> $GITHUB_OUTPUT
 fi
 
 # publish
-echo "::set-output name=publish_enabled::false"
+echo "publish_enabled=false" >> $GITHUB_OUTPUT
 if [ "$BUILD_ENABLED" == "true" ] && [ "$DOCKER_PUSH_ENABLED" == "true" ]; then
-  echo "::set-output name=publish_enabled::true"
+  echo "publish_enabled=true" >> $GITHUB_OUTPUT
 fi
