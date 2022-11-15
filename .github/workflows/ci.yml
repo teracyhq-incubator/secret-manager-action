@@ -119,6 +119,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+        fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
 
     - name: Format
       id: format
@@ -149,7 +152,7 @@ jobs:
       if: steps.format.outputs.branch == 'develop'
 
     - name: Git push changes
-      uses: ad-m/github-push-action@v0.5.0
+      uses: ad-m/github-push-action@master
       if: steps.format.outputs.branch == 'develop'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
